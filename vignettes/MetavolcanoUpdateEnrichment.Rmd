@@ -15,12 +15,10 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE,
   cache   = TRUE,
-  fig.width  = 8,
+  fig.width  = 6,
   fig.height = 5
 )
 ```
-
-> 📄 **See also:** [Proteomics meta-analysis — CPTAC pan-cancer example](cptac-proteomics.html)
 
 ## Overview
 
@@ -39,7 +37,7 @@ in this update of MetaVolcanoR:
   with MSigDB integration and three ranking strategies
 - **Protein-level meta-analysis**: MetaVolcanoR is feature-agnostic and 
   applies directly to differential protein abundance data (mass 
-  spectrometry, Olink, SomaScan), demonstrated here on a vaccine 
+  spectrometry, Olink, SomaScan), demonstrated [here](cptac-proteomics.html) on a vaccine 
   proteomics meta-analysis
 
 ## Setup
@@ -345,4 +343,3 @@ enrich_custom <- enrichment_mv(
   clean_pathway_names = FALSE
 )
 ```
-
