@@ -163,6 +163,97 @@ meta_mv <- rem_mv(
   ...
 )
 ```
+### Preparing Swish/fishpond transcript-level results
+
+If your differential expression analysis was performed at the transcript level
+using `swish()` from the fishpond package, MetaVolcanoR can integrate your
+results using an approximate estimate of variance derived from Swish's test
+statistic. This lets you go straight from the differential transcript
+expression (DET) results table to a MetaVolcanoR-ready format, without needing
+to carry the `SummarizedExperiment` object or its inferential replicates
+forward.
+
+**Checking your DET table**
+
+Before preparing your data, inspect the columns available in your results
+table:
+```{r, eval=FALSE}
+colnames(det)
+```
+
+`swish()` adds the following statistical result columns to `rowData()`:
+`stat`, `log2FC`, `pvalue`, `locfdr`, `qvalue`. If you extracted your DET table
+with something like `det <- as.data.frame(mcols(se))`, these columns carry
+over directly. Identifier columns (e.g. `tx_id`, `tx_name`) depend on how you
+imported your quantification data — if you used `tximeta::tximeta()`, these
+are typically added automatically based on the salmon index and usually
+contain Ensembl transcript IDs (e.g. `ENST00000456328.2`) rather than
+human-readable isoform names (e.g. `HES4-202`).
+
+`prepare_swish()` auto-detects the identifier column by looking for
+`tx_name`, `tx_id`, `transcript_id`, or `transcript_name` (in that order)
+among your column names — no need to pass `tx_col` if one of these is
+present. If your identifier column has a different name, or if you plan to
+combine several studies with `rem_mv()`, pass `tx_col` explicitly and make
+sure the identifiers are **consistent across all studies** (same ID type,
+same versioning). Any ID harmonization should be done upstream, on your DET
+table, prior to this step.
+
+**Preparing swish results for MetaVolcanoR**
+
+Once your DET table has a consistent identifier column, use `prepare_swish()`
+to generate the table required by MetaVolcanoR:
+```{r, eval=FALSE}
+# Auto-detects the identifier column (tx_name, tx_id, etc.)
+det_table <- prepare_swish(det = det_1)
+
+# Or specify explicitly if needed
+det_table <- prepare_swish(det = det_1, tx_col = "tx_name")
+```
+
+If your identifiers are plain Ensembl transcript IDs, the `Symbol` column
+will simply contain values like `ENST00000456328.2`. The meta-analysis will
+still run without any issue — this only affects how gene/transcript labels
+look on the volcano plot:
+```{r, eval=FALSE}
+det_table <- prepare_swish(det = det_1, tx_col = "tx_id")
+```
+
+**Complete workflow with `prepare_swish()`**
+```{r, eval=FALSE}
+library(fishpond)
+library(SummarizedExperiment)
+library(MetaVolcanoR)
+
+# Extract DET tables from your swish results
+det_1 <- as.data.frame(mcols(se_swish_1))
+det_2 <- as.data.frame(mcols(se_swish_2))
+
+# Prepare each study
+study_1 <- prepare_swish(det = det_1, tx_col = "tx_name")
+study_2 <- prepare_swish(det = det_2, tx_col = "tx_name")
+
+# Combine into named list — names are required
+my_studies <- list(
+  study1 = study_1,
+  study2 = study_2
+)
+
+# Run REM meta-analysis
+meta_results <- rem_mv(
+  diffexp       = my_studies,
+  pcriteria     = "pvalue",
+  foldchangecol = "Log2FC",
+  genenamecol   = "Symbol",
+  llcol         = "CI.L",
+  rlcol         = "CI.R",
+  cvar          = TRUE,
+  metathr       = 0.01,
+  draw          = "HTML"
+)
+
+meta_results@MetaVolcano
+```
 
 ### Preparing reuslts from common DE tools
 
@@ -176,6 +267,9 @@ deg_table <- prepare_limma(limma_toptable)
 
 # For edgeR results
 deg_table <- prepare_edger(edger_toptags$table)
+
+# For Swish/fishpond results (transcript-level)
+det_table <- prepare_swish(det)
 ```
 
 **Complete workflow with helper functions:**
