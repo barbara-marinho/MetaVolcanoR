@@ -15,8 +15,8 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE,
   cache   = TRUE,
-  fig.width  = 12,
-  fig.height = 8
+  fig.width  = 6,
+  fig.height = 5
 )
 ```
 
@@ -234,7 +234,7 @@ mv_vote@degfreq
 
 Fisher's combining approach also supports the updated color palette:
 
-```{r fisher, fig.width=14, fig.height=8}
+```{r fisher}
 mv_fisher <- combining_mv(
   diffexp       = diffexplist,
   pcriteria     = "pvalue",
@@ -345,4 +345,3 @@ enrich_custom <- enrichment_mv(
   clean_pathway_names = FALSE
 )
 ```
-
