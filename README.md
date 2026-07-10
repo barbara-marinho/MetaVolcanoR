@@ -64,6 +64,9 @@ draw_forest(meta_results, gene = "MMP9", draw = "PDF")
 
 **Data Preparation Helpers:**
 - `prepare_deseq2()` - One-line conversion from DESeq2 results
+- `prepare_limma()` - Format limma/voom output
+- `prepare_edger()` - Convert edgeR results
+- `prepare_swish()` - Convert swish/Fishpond transcript-level results
 - `prepare_limma()` - One-line conversion from limma/voom results
 - `prepare_edger()` - One-line conversion from edgeR results
 
