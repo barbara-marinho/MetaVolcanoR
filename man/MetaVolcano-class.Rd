@@ -18,6 +18,6 @@ MetaVolcano S4 Class
 
 \item{\code{MetaVolcano}}{gg}
 
-\item{\code{degfreq}}{gg}
+\item{\code{featurefreq}}{gg}
 }}
 

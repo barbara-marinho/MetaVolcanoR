@@ -8,7 +8,7 @@ setOldClass(c("ggplot2::ggplot", "ggplot", "ggplot2::gg", "gg"))
 #' @slot inputnames character
 #' @slot metaresult data.frame
 #' @slot MetaVolcano gg
-#' @slot degfreq gg
+#' @slot featurefreq gg
 #' @name MetaVolcano-class
 #' @rdname MetaVolcano-class
 #' @exportClass MetaVolcano
@@ -17,5 +17,5 @@ setClass("MetaVolcano",
                       inputnames = "character",
                       metaresult = "data.frame",
                       MetaVolcano = "gg",
-                      degfreq = "gg"))
+                      featurefreq = "gg"))
 

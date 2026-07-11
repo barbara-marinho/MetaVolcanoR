@@ -77,7 +77,7 @@ plot_mv <- function(meta_diffexp, nstud, genecol, comb, metafc,
             scale_x_continuous(breaks = -nstud:nstud, 
                    limits = c(-nstud - 0.5, nstud + 0.5)) +
             labs(x = "Sign consistency",
-                 y = "Number of times as differentially expressed",
+                 y = "Differential feature frequency",
                  title = plot_title)
     }
     

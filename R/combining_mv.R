@@ -206,7 +206,7 @@ combining_mv <- function(diffexp=list(), pcriteria="pvalue",
 		  metaresult=dplyr::select(meta_diffexp,
 				       dplyr::matches(rcols)),
 		  MetaVolcano=gg,
-		  degfreq=ggplot()
+		  featurefreq=ggplot()
 		  )
     return(result)	
 }

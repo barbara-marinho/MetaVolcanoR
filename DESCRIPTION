@@ -50,3 +50,4 @@ VignetteBuilder: knitr
 URL: https://github.com/iza-mcac/MetaVolcanoR
 BugReports: https://github.com/iza-mcac/MetaVolcanoR/issues
 Config/roxygen2/version: 8.0.0
+RoxygenNote: 7.3.3

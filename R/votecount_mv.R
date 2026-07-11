@@ -115,10 +115,10 @@ votecount_mv <- function(diffexp=list(), pcriteria="pvalue",
             diffexp <- lapply(diffexp, function(...) dplyr::select(...,
 			  dplyr::matches(paste(c(pcriteria, foldchangecol,
 				geneidcol, '^deg$'), collapse = '|'))))
-            # DEG by study data setting
+            # feature by study data setting
 	    bardat <- set_degbar_data(diffexp)
 
-            # --- merging DEG results	
+            # --- merging feature results	
             diffexp <- rename_col(diffexp, geneidcol)
             meta_diffexp <- Reduce(function(...) merge(..., 
 						       by = geneidcol, 
@@ -153,8 +153,8 @@ votecount_mv <- function(diffexp=list(), pcriteria="pvalue",
 				       '2.Up-regulated', '1.Unperturbed'))) %>%
         dplyr::arrange(-abs(idx))
 
-    # --- Drawing DEGs by dataset
-    gg <- draw_degbar(bardat, colors = rev(colors))
+    # --- Drawing features by dataset
+    gg <- draw_featurebar(bardat, colors = rev(colors))
     ff <- draw_cum_freq(meta_diffexp, nstud)
     gf <- plot_grid(gg, ff, align="h")
     mv <- plot_mv(meta_diffexp, nstud, genecol, FALSE, NULL,
@@ -167,10 +167,10 @@ votecount_mv <- function(diffexp=list(), pcriteria="pvalue",
         
     # --- Writing html device for offline visualization
     saveWidget(as_widget(ggplotly(gg)), 
-	paste0(normalizePath(outputfolder), "/deg_by_study_", 
+	paste0(normalizePath(outputfolder), "/feature_by_study_", 
 	       jobname, ".html"))
     saveWidget(as_widget(ggplotly(ff)), 
-		paste0(normalizePath(outputfolder), "/deg_InvCumDist_", 
+		paste0(normalizePath(outputfolder), "/feature_InvCumDist_", 
 		       jobname, ".html"))
     saveWidget(as_widget(ggplotly(mv)), 
 	paste0(normalizePath(outputfolder), 
@@ -180,7 +180,7 @@ votecount_mv <- function(diffexp=list(), pcriteria="pvalue",
 
     # --- Writing PDF visualization
     pdf(paste0(normalizePath(outputfolder),
-	       "/deg_by_study_", jobname,
+	       "/feature_by_study_", jobname,
 	       ".pdf"), width = 7, height = 4)
         plot(gf)
     dev.off()
@@ -193,7 +193,7 @@ votecount_mv <- function(diffexp=list(), pcriteria="pvalue",
 		
     }
 
-    # Return genes that were DE in at least one study
+    # Return features that were DE in at least one study
     # Set vote-counting result
     
     icols <- paste(c(genecol, pcriteria, foldchangecol), collapse="|")
@@ -206,7 +206,7 @@ votecount_mv <- function(diffexp=list(), pcriteria="pvalue",
 		  metaresult=dplyr::select(meta_diffexp,
 				       dplyr::matches(rcols)),
 		  MetaVolcano=mv,
-		  degfreq=plot_grid(gf)
+		  featurefreq=plot_grid(gf)
 		  )
 
     return(result)
