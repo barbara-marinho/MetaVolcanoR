@@ -3,14 +3,14 @@ Type: Package
 Title: Differential Feature Expression Meta-analysis Visualization Tool
 Version: 1.0.2
 Authors@R: c(
-    person("Bárbara", "Marinho", email = "barbarammarinhos@gmail.com", role = "aut"),
-    person("César A.", "Prada-Medina", role = "aut"),
-    person("Thiago", "Hirata", role = "ctb"),
-    person("Débora", "Peixe", role = "ctb"),
-    person("Natália", "von Staa Mansur", role = "ctb"),
-    person("Marcela", "Ishihara", role = "ctb"),
-    person("Clarisse", "Reis", role = "ctb"),
-    person("Carlos", "Mata-Machado", role = "ctb"),
+    person("Bárbara", "Marinho", email = "barbarammarinhos@gmail.com", role = c("aut", "ctb")),
+    person("César A.", "Prada-Medina", role = c("aut", "ctb")),
+    person("Thiago", "Hirata", role = c("aut", "ctb")),
+    person("Débora", "Peixe", role = c("aut", "ctb")),
+    person("Natália", "von Staa Mansur", role = c("aut", "ctb")),
+    person("Marcela", "Ishihara", role = c("aut", "ctb")),
+    person("Clarisse", "Reis", role = c("aut", "ctb")),
+    person("Carlos", "Mata-Machado", role = c("aut", "ctb")),
     person("Glória R.", "Franco", role = "ths"),
     person("Izabela", "Mamede", email = "iza.mamede@gmail.com", role = c("aut", "cre")),
     person("Helder I.", "Nakaya", email = "hnkaya@usp.br", role = c("aut", "ths")))

@@ -5,4 +5,7 @@ articles:
   CPTACProteomics: CPTACProteomics.html
   MetaVolcano: MetaVolcano.html
   MetavolcanoUpdateEnrichment: MetavolcanoUpdateEnrichment.html
-last_built: 2026-07-13T20:30Z
+last_built: 2026-07-13T20:42Z
+urls:
+  reference: https://csbl-usp.github.io/MetaVolcanoR/reference
+  article: https://csbl-usp.github.io/MetaVolcanoR/articles
