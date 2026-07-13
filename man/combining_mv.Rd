@@ -23,6 +23,9 @@ combining_mv(
   label_size = 3,
   plot_title = NULL,
   show_legend = FALSE
+  outputfolder = ".",
+  draw = "HTML",
+  render = F
 )
 }
 \arguments{
@@ -67,6 +70,11 @@ c("Mean", "Median") <string>}
 \item{plot_title}{custom plot title}
 
 \item{show_legend}{whether to show the legend}
+\item{render}{A boolean parameter that determines whether the plot should be rendered. 
+If `TRUE`, the function will produce and save the plot based on the specified `draw` 
+parameter (either as an HTML or PDF file). If `FALSE` (default), no plot will be 
+rendered or saved. It's useful for cases where you might want to run the function 
+for its side effects or calculations without necessarily visualizing the result.}
 }
 \value{
 \code{MetaVolcano} object

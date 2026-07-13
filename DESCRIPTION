@@ -1,7 +1,7 @@
 Package: MetaVolcanoR
 Type: Package
 Title: Gene Expression Meta-analysis Visualization Tool
-Version: 1.0.1
+Version: 1.0.2
 Authors@R: c(person("Cesar", "Prada", email = "cesar.prada@usp.br", 
     role = c("aut", "cre"), comment = c(ORCID = "0000-0000-0000-0000")), 
     person("Diogenes", "Lima", email = "diogenes.lima@usp.br", 
@@ -51,3 +51,4 @@ URL: https://github.com/iza-mcac/MetaVolcanoR
 BugReports: https://github.com/iza-mcac/MetaVolcanoR/issues
 Config/roxygen2/version: 8.0.0
 RoxygenNote: 7.3.3
+RoxygenNote: 7.2.3
