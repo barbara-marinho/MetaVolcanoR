@@ -32,7 +32,7 @@ in this update of MetaVolcanoR:
 - **Improved label selection** using the package's own ranking metrics 
   (`abs(idx)` for vote-counting, `rank` for REM)
 - **Customizable DEG barplot** colors via new `colors` parameter in 
-  `draw_degbar()`
+  `draw_featurebar()`
 - **`enrichment_mv()`**: new function for feature set enrichment analysis 
   with MSigDB integration and three ranking strategies
 - **Protein-level meta-analysis**: MetaVolcanoR is feature-agnostic and 
@@ -222,10 +222,10 @@ The updated behavior uses `abs(idx)` and filters out unperturbed features:
 
 ### DEG barplot with custom colors
 
-`draw_degbar()` now accepts a `colors` parameter:
+`draw_featurebar()` now accepts a `colors` parameter:
 
 ```{r degbar, fig.width=11, fig.height=8, out.width="100%"}
-mv_vote@degfreq
+mv_vote@featurefreq
 ```
 
 ## 4. Combining (Fisher's Method)
