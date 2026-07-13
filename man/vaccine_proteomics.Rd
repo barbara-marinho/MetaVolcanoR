@@ -15,7 +15,7 @@ Derived from public systems-vaccinology proteomics resources
   vignette for the retrieval and formatting workflow.
 }
 \usage{
-data(vaccine_proteomics)
+vaccine_proteomics
 }
 \description{
 A named list of five differential-abundance tables describing the

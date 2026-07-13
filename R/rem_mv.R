@@ -236,7 +236,7 @@ llcol, rlcol, vcol), is.null)], collapse = "|"))))
 		  metaresult=dplyr::select(meta_diffexp,
 				       dplyr::matches(rcols)),
 		  MetaVolcano=gg,
-		  degfreq=ggplot()
+		  featurefreq=ggplot()
 		  )
     return(result)
 }
