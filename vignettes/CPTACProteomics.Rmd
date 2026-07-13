@@ -74,7 +74,7 @@ library(MetaVolcanoR)
 library(dplyr)
 
 # Point reticulate at the Python env where cptac is installed, e.g.:
-# use_virtualenv("cptac311", required = TRUE)
+use_virtualenv("cptac311", required = TRUE)
 
 cptac <- import("cptac")
 ```

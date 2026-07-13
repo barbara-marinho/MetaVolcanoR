@@ -421,7 +421,7 @@ meta_degs_vote <- votecount_mv(diffexp=diffexplist,
 			       draw='HTML')
 
 head(meta_degs_vote@metaresult, 3)
-meta_degs_vote@degfreq
+meta_degs_vote@featurefreq
 ```
 
 The *vote-counting* MetaVolcano visualizes genes based on the number of studies

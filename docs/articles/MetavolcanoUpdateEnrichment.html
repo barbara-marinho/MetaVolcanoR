@@ -115,7 +115,7 @@ readability in presentations and print</li>
 ranking metrics (<code>abs(idx)</code> for vote-counting,
 <code>rank</code> for REM)</li>
 <li>
-<strong>Customizable feature barplot</strong> colors via new
+<strong>Customizable DEG barplot</strong> colors via new
 <code>colors</code> parameter in <code><a href="../reference/draw_featurebar.html">draw_featurebar()</a></code>
 </li>
 <li>
@@ -410,16 +410,16 @@ and direction consistency (<code>idx = ndeg × ddeg</code>).</p>
 <div class="section level3">
 <h3 id="label-selection-criteria">Label selection criteria<a class="anchor" aria-label="anchor" href="#label-selection-criteria"></a>
 </h3>
-<p>Previous behavior ranked labels by <code>nfeature</code> only (number
-of studies where DE). This could label features with inconsistent
-direction across studies.</p>
+<p>Previous behavior ranked labels by <code>ndeg</code> only (number of
+studies where DE). This could label features with inconsistent direction
+across studies.</p>
 <p>The updated behavior uses <code>abs(idx)</code> and filters out
 unperturbed features:</p>
 <table class="table">
 <thead><tr class="header">
 <th>Protein</th>
-<th>nfeature</th>
-<th>dfeature</th>
+<th>ndeg</th>
+<th>ddeg</th>
 <th>idx</th>
 <th>Previous rank</th>
 <th>Updated rank</th>
@@ -453,13 +453,13 @@ unperturbed features:</p>
 </table>
 </div>
 <div class="section level3">
-<h3 id="feature-barplot-with-custom-colors">Feature barplot with custom colors<a class="anchor" aria-label="anchor" href="#feature-barplot-with-custom-colors"></a>
+<h3 id="deg-barplot-with-custom-colors">DEG barplot with custom colors<a class="anchor" aria-label="anchor" href="#deg-barplot-with-custom-colors"></a>
 </h3>
 <p><code><a href="../reference/draw_featurebar.html">draw_featurebar()</a></code> now accepts a <code>colors</code>
 parameter:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mv_vote</span><span class="op">@</span><span class="va">featurefreq</span></span></code></pre></div>
-<p><img src="MetavolcanoUpdateEnrichment_files/figure-html/featurebar-1.png" class="r-plt" alt="" width="100%"></p>
+<p><img src="MetavolcanoUpdateEnrichment_files/figure-html/degbar-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
 </div>
 <div class="section level2">
