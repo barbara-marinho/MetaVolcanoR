@@ -31,7 +31,7 @@ in this update of MetaVolcanoR:
   `scale_x_discrete`)
 - **Improved label selection** using the package's own ranking metrics 
   (`abs(idx)` for vote-counting, `rank` for REM)
-- **Customizable DEG barplot** colors via new `colors` parameter in 
+- **Customizable feature barplot** colors via new `colors` parameter in 
   `draw_featurebar()`
 - **`enrichment_mv()`**: new function for feature set enrichment analysis 
   with MSigDB integration and three ranking strategies
@@ -220,11 +220,11 @@ The updated behavior uses `abs(idx)` and filters out unperturbed features:
 | B       | 5    | -5   | -25 | 1st (tied)    | 2nd          |
 | C       | 5    | 1    | 5   | 1st (tied)    | 3rd          |
 
-### DEG barplot with custom colors
+### Feature barplot with custom colors
 
 `draw_featurebar()` now accepts a `colors` parameter:
 
-```{r degbar, fig.width=11, fig.height=8, out.width="100%"}
+```{r featurebar, fig.width=11, fig.height=8, out.width="100%"}
 mv_vote@featurefreq
 ```
 
