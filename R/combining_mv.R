@@ -45,18 +45,18 @@ NULL
 #' mv <- combining_mv(diffexplist)
 #' str(mv)
 combining_mv <- function(diffexp=list(), pcriteria="pvalue", 
-			 foldchangecol="Log2FC", genenamecol="Symbol", 
-			 geneidcol=NULL, metafc="Mean", metathr=0.01, 
-			 collaps="FALSE", jobname="MetaVolcano", 
-			 outputfolder = tempdir(), draw="HTML",
-			 colors = c("#083e46", "grey", "#811820"),
-			 point_size = 0.5,
-			 label_genes = NULL,
-			 label_top_n = NULL,
-			 label_size = 3,
-			 plot_title = NULL,
-			 show_legend = FALSE) {
-			 outputfolder=".", draw="HTML", render = F) {
+                         foldchangecol="Log2FC", genenamecol="Symbol", 
+                         geneidcol=NULL, metafc="Mean", metathr=0.01, 
+                         collaps=FALSE, jobname="MetaVolcano", 
+                         outputfolder = tempdir(), draw="HTML",
+                         colors = c("#083e46", "grey", "#811820"),
+                         point_size = 0.5,
+                         label_genes = NULL,
+                         label_top_n = NULL,
+                         label_size = 3,
+                         plot_title = NULL,
+                         show_legend = FALSE,
+                         render = FALSE) {
     	
     if(!draw %in% c('PDF', 'HTML')) {
 		
@@ -184,42 +184,25 @@ combining_mv <- function(diffexp=list(), pcriteria="pvalue",
                  label_size = label_size, plot_title = plot_title,
                  show_legend = show_legend)
     
-    if(draw == "HTML") {
+   if(render) {
 
-        # --- Writing html device for offline visualization
-        saveWidget(as_widget(ggplotly(gg)), 
-            paste0(normalizePath(outputfolder), 
-	        '/combining_method_MetaVolcano_', jobname, ".html"))
+        if(draw == "HTML") {
 
-    } else if(draw == "PDF") {
+            # --- Writing html device for offline visualization
+            saveWidget(as_widget(ggplotly(gg)), 
+                paste0(normalizePath(outputfolder), 
+                    '/combining_method_MetaVolcano_', jobname, ".html"))
 
-        # --- Writing PDF visualization
-        pdf(paste0(normalizePath(outputfolder), 
-            '/combining_method_MetaVolcano_', jobname, ".pdf"), 
-	     width = 4, height = 5)
-	        plot(gg)
-        dev.off()
+        } else if(draw == "PDF") {
 
-    } 
-    gg <- plot_mv(meta_diffexp, NULL, genecol, TRUE, metafc)
-    if(render) {
-      if(draw == "HTML") {
-  
-          # --- Writing html device for offline visualization
-          saveWidget(as_widget(ggplotly(gg)), 
-              paste0(normalizePath(outputfolder), 
-  	        '/combining_method_MetaVolcano_', jobname, ".html"))
-  
-      } else if(draw == "PDF") {
-  
-          # --- Writing PDF visualization
-          pdf(paste0(normalizePath(outputfolder), 
-              '/combining_method_MetaVolcano_', jobname, ".pdf"), 
-  	     width = 4, height = 5)
-  	        plot(gg)
-          dev.off()
-  
-      } 
+            # --- Writing PDF visualization
+            pdf(paste0(normalizePath(outputfolder), 
+                '/combining_method_MetaVolcano_', jobname, ".pdf"), 
+                 width = 4, height = 5)
+            plot(gg)
+            dev.off()
+
+        }
     }
 
     # Set combining result
