@@ -22,6 +22,40 @@ knitr::opts_chunk$set(
 
 > 📄 See also: [Protein-level meta-analysis — CPTAC pan-cancer example](Proteomics.html)
 
+- [Introduction: Why Meta-Analysis?](#introduction-why-meta-analysis)
+    - [Overview](#overview)
+    - [Load library](#load-library)
+- [Preparing Your Data](#preparing-your-data)
+    - [CI ready](#ci-ready)
+    - [Standard error (SE)](#standard-error-se)
+    - [Variance directly](#variance-directly)
+    - [Test statistic (z or t)](#test-statistic-z-or-t)
+    - [DESeq2](#deseq2)
+    - [limma](#limma)
+    - [edgeR](#edger)
+    - [Swish/fishpond (transcript-level)](#swishfishpond-transcript-level)
+    - [GEO2R](#geo2r)
+    - [Checking your data is correctly formatted](#checking-your-data-is-correctly-formatted)
+- [Implemented meta-analysis approaches](#implemented-meta-analysis-approaches)
+    - [1. Random Effects Model (REM)](#random-effects-model-rem)
+        - [Labeling top features](#labeling-top-features)
+        - [Forest plots](#forest-plots)
+    - [2. Vote-counting approach](#vote-counting-approach)
+        - [Feature barplot](#feature-barplot)
+    - [3. Combining approach (Fisher's method)](#combining-approach-fishers-method)
+    - [4. Functional enrichment — `enrichment_mv()`](#functional-enrichment-enrichment_mv)
+- [Additional example: differentially methylated probes](#additional-example-differentially-methylated-probes)
+- [Customizing your plots](#customizing-your-plots)
+    - [Basic customization options](#basic-customization-options)
+        - [Example 1: custom colors and feature labels](#example-1-custom-colors-and-feature-labels)
+        - [Example 2: highlighting top features automatically](#example-2-highlighting-top-features-automatically)
+        - [Example 3: publication-ready figures](#example-3-publication-ready-figures)
+        - [Example 4: customizing forest plots](#example-4-customizing-forest-plots)
+    - [Color scheme examples](#color-scheme-examples)
+    - [Combining multiple customizations](#combining-multiple-customizations)
+    - [Tips for publication-quality figures](#tips-for-publication-quality-figures)
+    - [Saving plots separately](#saving-plots-separately)
+
 # Introduction: Why Meta-Analysis?
 
 Imagine you're studying a disease and find 5 different studies on Gene Expression Omnibus, each identifying
@@ -64,7 +98,10 @@ strategies to summarize differential activity from different studies:
 3. **A vote-counting approach** — counts, per feature, how many studies call it differentially expressed and
    in which direction.
 
-In all three, MetaVolcanoR exploits the volcano-plot reasoning to visualize the meta-analysis result.
+In all three, MetaVolcanoR exploits the volcano-plot reasoning to visualize the meta-analysis result. All
+plots below use the package's default styling; a dedicated
+[Customizing your plots](#customizing-your-plots) section at the end covers colors, titles, and labeling in
+depth.
 
 ## Load library
 
@@ -83,8 +120,23 @@ MetaVolcanoR requires differential expression results with:
 3. **P-values**
 4. **Confidence intervals OR variance** (for the REM method only)
 
-Not sure where to start? Pick the tab below that matches what you already have or which tool produced
-your results — each one shows only the code relevant to that path.
+MetaVolcanoR only ever needs those four fields — what changes is how you get there from whatever
+tool you already used. Find your scenario below and jump straight to it; each tab shows only the
+code relevant to that path, so you don't need to read the others.
+
+- Already have a DEG table with a confidence interval (`CI.L`/`CI.R`) computed →
+  [CI ready](#ci-ready)
+- Already have a DEG table with standard error (SE), no CI →
+  [Standard error (SE)](#standard-error-se)
+- Already have variance computed directly →
+  [Variance directly](#variance-directly)
+- Only have a test statistic (z or t), no CI/SE/variance →
+  [Test statistic (z or t)](#test-statistic-z-or-t)
+- Ran **DESeq2** → [DESeq2](#deseq2)
+- Ran **limma** → [limma](#limma)
+- Ran **edgeR** → [edgeR](#edger)
+- Ran **Swish/fishpond** (transcript-level) → [Swish/fishpond](#swishfishpond-transcript-level)
+- Downloaded a table from **NCBI GEO2R** → [GEO2R](#geo2r)
 
 ## What do you have? {.tabset .tabset-pills}
 
@@ -333,7 +385,7 @@ multiple testing across all meta-analyzed features (Benjamini-Hochberg by defaul
 `fdr_method` argument — see `?rem_mv`). Use `randomP.adjust`, not the nominal `randomP`, for feature
 selection and for functional enrichment (see below).
 
-```{r rem_basic}
+```{r rem_basic, fig.width=9, fig.height=7, out.width="100%"}
 mv_rem <- rem_mv(
   diffexp       = diffexplist,
   pcriteria     = "pvalue",
@@ -351,12 +403,12 @@ head(mv_rem@metaresult, 3)
 mv_rem@MetaVolcano
 ```
 
-### Labels and custom colors
+### Labeling top features
 
 When `label_top_n` is used, features are ranked by the topconfects `rank` metric, which balances effect
-size and confidence. The `colors` parameter accepts a named vector for the sign-consistency gradient:
+size and confidence, rather than by fold-change or p-value alone:
 
-```{r rem_labeled, fig.width=11, fig.height=8, out.width="100%"}
+```{r rem_labeled, fig.width=9, fig.height=7, out.width="100%"}
 mv_rem_labeled <- rem_mv(
   diffexp       = diffexplist,
   pcriteria     = "pvalue",
@@ -365,11 +417,8 @@ mv_rem_labeled <- rem_mv(
   llcol         = "CI.L",
   rlcol         = "CI.R",
   metathr       = 0.01,
-  colors        = c(low = "purple", mid = "white", high = "orange", na = "gray80"),
   label_top_n   = 10,
   label_size    = 3.5,
-  plot_title    = "REM Meta-Analysis (Top 10)",
-  show_legend   = TRUE,
   jobname       = "REM_labeled",
   outputfolder  = tempdir(),
   draw          = "HTML"
@@ -378,29 +427,35 @@ mv_rem_labeled <- rem_mv(
 mv_rem_labeled@MetaVolcano
 ```
 
-### Forest plot for a specific feature
+### Forest plots
 
-```{r forest, fig.width=11, fig.height=8, out.width="100%"}
-top3 <- mv_rem@metaresult %>%
-  filter(!is.na(randomP.adjust)) %>%
-  arrange(rank) %>%
-  head(3) %>%
-  pull(Symbol)
+`draw_forest()` shows the per-study fold-change and confidence interval behind the REM summary for a
+single feature. Below, one consistently **up**-regulated feature (`MMP9`) and one consistently
+**down**-regulated feature (`COL6A6`):
 
-cat("Top 3 features:", paste(top3, collapse = ", "), "\n")
-
+```{r forest_up, fig.width=9, fig.height=7, out.width="100%"}
 draw_forest(
   remres        = mv_rem,
-  gene          = top3[1],
+  gene          = "MMP9",
   genecol       = "Symbol",
   foldchangecol = "Log2FC",
   llcol         = "CI.L",
   rlcol         = "CI.R",
-  colors        = c(positive = "darkred", negative = "steelblue",
-                    neutral = "gray70", reference = "black"),
-  point_size    = 3,
-  plot_title    = paste(top3[1], "Log2FC across studies"),
-  jobname       = "Forest_example",
+  jobname       = "MetaVolcano",
+  outputfolder  = tempdir(),
+  draw          = "HTML"
+)
+```
+
+```{r forest_down, fig.width=9, fig.height=7, out.width="100%"}
+draw_forest(
+  remres        = mv_rem,
+  gene          = "COL6A6",
+  genecol       = "Symbol",
+  foldchangecol = "Log2FC",
+  llcol         = "CI.L",
+  rlcol         = "CI.R",
+  jobname       = "MetaVolcano",
   outputfolder  = tempdir(),
   draw          = "HTML"
 )
@@ -418,12 +473,12 @@ consistency (`idx = ndeg × ddeg`) — rather than `ndeg` alone, which avoids la
 inconsistent direction across studies just because they were tested often:
 
 | Feature | ndeg | ddeg | idx | Rank by `ndeg` alone | Rank by `abs(idx)` |
-|---------|------|------|-----|----------------------|---------------------|
-| A       | 5    | 5    | 25  | 1st (tied)            | 1st                 |
-| B       | 5    | -5   | -25 | 1st (tied)            | 2nd                 |
-| C       | 5    | 1    | 5   | 1st (tied)            | 3rd                 |
+|---------|------|------|-----|-----------------------|----------------------|
+| A       | 5    | 5    | 25  | 1st (tied)            | 1st                  |
+| B       | 5    | -5   | -25 | 1st (tied)            | 2nd                  |
+| C       | 5    | 1    | 5   | 1st (tied)            | 3rd                  |
 
-```{r vote, fig.width=11, fig.height=8, out.width="100%"}
+```{r vote, fig.width=9, fig.height=7, out.width="100%"}
 mv_vote <- votecount_mv(
   diffexp       = diffexplist,
   pcriteria     = "pvalue",
@@ -435,7 +490,6 @@ mv_vote <- votecount_mv(
   metathr       = 0.01,
   label_top_n   = 10,
   label_size    = 3.5,
-  plot_title    = "Vote-Counting (Top 10 by |idx|)",
   jobname       = "Vote_example",
   outputfolder  = tempdir(),
   draw          = "HTML"
@@ -445,12 +499,13 @@ head(mv_vote@metaresult, 3)
 mv_vote@MetaVolcano
 ```
 
-### Feature barplot with custom colors
+### Feature barplot
 
-`draw_featurebar()` accepts a `colors` parameter and, via `mv_vote@featurefreq`, also shows the inverse
+`draw_featurebar()` accepts a `colors` parameter (see
+[Customizing your plots](#customizing-your-plots)) and, via `mv_vote@featurefreq`, also shows the inverse
 cumulative distribution of consistently perturbed features:
 
-```{r featurebar, fig.width=11, fig.height=8, out.width="100%"}
+```{r featurebar, fig.width=9, fig.height=7, out.width="100%"}
 mv_vote@featurefreq
 ```
 
@@ -461,7 +516,7 @@ combines its per-study p-values with Fisher's method. As with the REM, the resul
 `metap.adjust` — `metap` corrected for multiple testing (default Benjamini-Hochberg, configurable via
 `fdr_method`) — which is what should drive feature selection rather than the nominal `metap`.
 
-```{r fisher, fig.width=11, fig.height=8, out.width="100%"}
+```{r fisher, fig.width=9, fig.height=7, out.width="100%"}
 mv_fisher <- combining_mv(
   diffexp       = diffexplist,
   pcriteria     = "pvalue",
@@ -470,10 +525,6 @@ mv_fisher <- combining_mv(
   metafc        = "Mean",
   metathr       = 0.01,
   collaps       = TRUE,
-  colors        = c("#083e46", "gray90", "#811820"),
-  point_size    = 1.2,
-  show_legend   = TRUE,
-  plot_title    = "Fisher's Combined Test",
   jobname       = "Fisher_example",
   outputfolder  = tempdir(),
   draw          = "HTML"
@@ -603,7 +654,7 @@ str(meta_input, max.level = 1)
 
 Once formatted, all three MetaVolcanoR strategies apply exactly as with gene-level data:
 
-```{r meth_rem, eval=requireNamespace("IlluminaHumanMethylation450kanno.ilmn12.hg19", quietly = TRUE), fig.width=11, fig.height=8, out.width="100%"}
+```{r meth_rem, eval=requireNamespace("IlluminaHumanMethylation450kanno.ilmn12.hg19", quietly = TRUE), fig.width=9, fig.height=7, out.width="100%"}
 mv_rem_meth <- rem_mv(
   diffexp       = meta_input,
   pcriteria     = "P.Value",
@@ -612,9 +663,7 @@ mv_rem_meth <- rem_mv(
   llcol         = "CI.L",
   rlcol         = "CI.R",
   metathr       = 0.01,
-  colors        = c(low = "#df76ac", mid = "white", high = "#61a110", na = "gray80"),
   label_top_n   = 5,
-  plot_title    = "REM — methylation probes",
   jobname       = "REM_methylation",
   outputfolder  = tempdir(),
   draw          = "HTML"
@@ -623,7 +672,7 @@ mv_rem_meth <- rem_mv(
 mv_rem_meth@MetaVolcano
 ```
 
-```{r meth_vote, eval=requireNamespace("IlluminaHumanMethylation450kanno.ilmn12.hg19", quietly = TRUE), fig.width=11, fig.height=8, out.width="100%"}
+```{r meth_vote, eval=requireNamespace("IlluminaHumanMethylation450kanno.ilmn12.hg19", quietly = TRUE), fig.width=9, fig.height=7, out.width="100%"}
 mv_vote_meth <- votecount_mv(
   diffexp       = meta_input,
   pcriteria     = "P.Value",
@@ -635,7 +684,6 @@ mv_vote_meth <- votecount_mv(
   metathr       = 0.01,
   label_top_n   = 10,
   label_size    = 3.5,
-  plot_title    = "Vote-Counting — methylation probes",
   jobname       = "Vote_methylation",
   outputfolder  = tempdir(),
   draw          = "HTML"
@@ -644,7 +692,7 @@ mv_vote_meth <- votecount_mv(
 mv_vote_meth@MetaVolcano
 ```
 
-```{r meth_fisher, eval=requireNamespace("IlluminaHumanMethylation450kanno.ilmn12.hg19", quietly = TRUE), fig.width=11, fig.height=8, out.width="100%"}
+```{r meth_fisher, eval=requireNamespace("IlluminaHumanMethylation450kanno.ilmn12.hg19", quietly = TRUE), fig.width=9, fig.height=7, out.width="100%"}
 mv_fisher_meth <- combining_mv(
   diffexp       = meta_input,
   pcriteria     = "P.Value",
@@ -653,10 +701,6 @@ mv_fisher_meth <- combining_mv(
   metafc        = "Mean",
   metathr       = 0.01,
   collaps       = TRUE,
-  colors        = c("#df76ac", "gray90", "#61a110"),
-  point_size    = 1.2,
-  show_legend   = TRUE,
-  plot_title    = "Fisher's Combined Test — methylation probes",
   jobname       = "Fisher_methylation",
   outputfolder  = tempdir(),
   draw          = "HTML"
@@ -669,6 +713,195 @@ Since `getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)` also retriev
 genomic feature each probe overlaps (promoter, gene body, TSS, UTRs) — it's straightforward to filter for
 features of interest before running the meta-analysis, if a specific regulatory context is the target of
 the study.
+
+# Customizing your plots
+
+Every example above uses MetaVolcanoR's default styling — no custom colors, no titles, one consistent
+figure size. All three main functions (`rem_mv()`, `votecount_mv()`, `combining_mv()`), plus
+`draw_forest()` and `draw_featurebar()`, also accept a set of customization parameters, useful when
+preparing figures for a manuscript or a presentation.
+
+## Basic customization options
+
+- **`colors`** — custom color scheme
+- **`point_size`** — size of data points
+- **`label_genes`** — vector of specific features to label
+- **`label_top_n`** — automatically label the top N features
+- **`label_size`** — size of feature labels
+- **`plot_title`** — custom plot title (`NULL` for no title, the default)
+- **`show_legend`** — show or hide the legend
+
+### Example 1: custom colors and feature labels
+
+```{r custom_1, fig.width=9, fig.height=7, out.width="100%"}
+meta_custom <- rem_mv(
+  diffexp       = diffexplist,
+  metathr       = 0.01,
+  outputfolder  = tempdir(),
+  draw          = "HTML",
+  colors        = c(low = "purple", mid = "white", high = "orange", na = "gray80"),
+  point_size    = 1.5,
+  label_genes   = c("MMP9", "COL6A6", "MXRA5", "CIDEA"),
+  label_size    = 4,
+  plot_title    = "REM Meta-Analysis - Custom Colors",
+  show_legend   = TRUE
+)
+
+meta_custom@MetaVolcano
+```
+
+### Example 2: highlighting top features automatically
+
+```{r custom_2, eval=FALSE}
+meta_vote_labeled <- votecount_mv(
+  diffexp       = diffexplist,
+  pvalue        = 0.05,
+  metathr       = 0.01,
+  outputfolder  = tempdir(),
+  draw          = "HTML",
+  colors        = c("orange", "gray90", "purple"),
+  point_size    = 1.2,
+  label_top_n   = 10,
+  label_size    = 3.5,
+  plot_title    = "Vote-Counting: Top 10 Features Labeled"
+)
+
+meta_vote_labeled@MetaVolcano
+```
+
+### Example 3: publication-ready figures
+
+```{r custom_3, eval=FALSE}
+meta_publication <- combining_mv(
+  diffexp       = diffexplist,
+  metafc        = "Median",
+  metathr       = 0.01,
+  collaps       = TRUE,
+  outputfolder  = tempdir(),
+  draw          = "HTML",
+  colors        = c("darkgreen", "white", "darkorange"),
+  point_size    = 1.0,
+  label_genes   = c("MMP9", "ANG", "ACVR1C"),
+  label_size    = 3,
+  plot_title    = NULL,   # No title, for publication
+  show_legend   = FALSE
+)
+
+meta_publication@MetaVolcano
+```
+
+### Example 4: customizing forest plots
+
+```{r custom_4, eval=FALSE}
+draw_forest(
+  remres        = mv_rem,
+  gene          = "MMP9",
+  outputfolder  = tempdir(),
+  draw          = "PDF",
+  colors        = c(
+    positive  = "darkred",   # Positive fold-change
+    negative  = "steelblue", # Negative fold-change
+    neutral   = "gray70",    # Individual studies
+    reference = "black"      # Reference line
+  ),
+  point_size    = 3,
+  plot_width    = 7,   # inches, for PDF
+  plot_height   = 6,
+  plot_title    = "MMP9 Expression Meta-Analysis"
+)
+```
+
+## Color scheme examples
+
+```{r color_schemes, eval=FALSE}
+# Professional/conservative
+colors_professional <- c(low = "blue", mid = "white", high = "red", na = "gray80")
+
+# High contrast (for presentations)
+colors_presentation <- c(low = "purple", mid = "white", high = "orange", na = "lightgray")
+
+# Color-blind friendly
+colors_colorblind <- c(low = "#0072B2", mid = "white", high = "#D55E00", na = "gray80")
+
+# Grayscale (for print)
+colors_grayscale <- c(low = "black", mid = "gray90", high = "gray30", na = "gray70")
+
+meta_rem <- rem_mv(
+  diffexp = diffexplist,
+  colors  = colors_colorblind,  # or any of the schemes above
+  # ... other parameters
+)
+```
+
+For vote-counting and combining, provide a 3-color vector instead (down, neutral, up):
+
+```{r vote_colors, eval=FALSE}
+custom_colors <- c("navyblue", "gray85", "darkred")
+
+meta_vote <- votecount_mv(
+  diffexp = diffexplist,
+  colors  = custom_colors,
+  # ... other parameters
+)
+```
+
+## Combining multiple customizations
+
+```{r combining_customizations, eval=FALSE}
+meta_final <- rem_mv(
+  diffexp       = diffexplist,
+  metathr       = 0.01,
+  outputfolder  = tempdir(),
+  draw          = "HTML",
+  ncores        = 4,
+  colors        = c(low = "#0072B2", mid = "white", high = "#D55E00", na = "gray80"),
+  point_size    = 1.5,
+  label_genes   = c("MMP9", "COL6A6"),
+  label_top_n   = 5,
+  label_size    = 3.5,
+  plot_title    = "Meta-Analysis: Disease vs Control",
+  show_legend   = TRUE
+)
+
+meta_final@MetaVolcano
+
+draw_forest(
+  remres        = meta_final,
+  gene          = "MMP9",
+  outputfolder  = tempdir(),
+  draw          = "PDF",
+  colors        = c(positive = "#D55E00", negative = "#0072B2",
+                    neutral = "gray60", reference = "black"),
+  point_size    = 3,
+  plot_width    = 8,
+  plot_height   = 6
+)
+```
+
+## Tips for publication-quality figures
+
+1. Use color-blind friendly palettes (see examples above).
+2. Set `show_legend = FALSE` for cleaner figures (add a legend in the figure caption instead).
+3. Label only key features rather than showing every label.
+4. Use `plot_title = NULL` and add titles in your manuscript text instead.
+5. Save as PDF (`draw = "PDF"`) for vector graphics in publications.
+6. Adjust `plot_width` and `plot_height` to match journal requirements.
+7. Use consistent colors across all figures in a given paper.
+
+## Saving plots separately
+
+```{r saving_plots, eval=FALSE}
+meta_result <- rem_mv(
+  diffexp      = diffexplist,
+  draw         = "HTML",  # or "PDF"
+  outputfolder = "path/to/output"
+  # ... other parameters
+)
+
+# The plot is automatically saved to outputfolder.
+# HTML: interactive plot you can explore in a browser.
+# PDF: publication-ready vector graphics.
+```
 
 ```{r session}
 sessionInfo()
