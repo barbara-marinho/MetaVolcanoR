@@ -3,6 +3,7 @@
 #' @importFrom methods new 'slot<-' show
 #' @importFrom plotly as_widget ggplotly
 #' @importFrom htmlwidgets saveWidget
+#' @importFrom stats p.adjust
 #' @import dplyr
 NULL
 

@@ -1,4 +1,4 @@
-#' @importFrom stats median quantile
+#' @importFrom stats median quantile p.adjust
 #' @importFrom grDevices pdf dev.off
 #' @importFrom graphics plot
 #' @importFrom plotly as_widget
